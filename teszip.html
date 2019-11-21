@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id='dwn'>download</button>
+    <script src="jszip.js"></script>
+    <script src="lib.js"></script>
+    <script src="FileSaver.min.js"></script>
+    <script src="xlsx.full.min.js"></script>
+    <script>
+        'use strict';
+        let dwn = document.getElementById('dwn');
+        let xlku = new lib();
+        let rels = new Blob([xlku.rels], { type: 'application/vnd.openxmlformats-package.relationships+xml' }),
+            xlrel = new Blob([xlku.xlrel], { type: "application/vnd.openxmlformats-package.relationships+xml" }),
+            theme = new Blob([xlku.theme], { type: "application/vnd.openxmlformats-officedocument.theme+xml" }),
+            xlsheet1 = new Blob([xlku.xlsheet1], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml" }),
+            sharedStrings = new Blob([xlku.sharedStrings], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml" }),
+            xlstyle = new Blob([xlku.xlstyle], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml" }),
+            xlworkbook = new Blob([xlku.xlworkbook], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" }),
+            content_type = new Blob([xlku.content_type], { type: "application/xml" });
+
+        let zip = new JSZip();
+        zip.folder('_rels').file('.rels', rels);
+        zip.folder('xl').folder('_rels').file('workbook.xml.rels', xlrel);
+        zip.folder('xl').folder('theme').file('theme1.xml', theme);
+        zip.folder('xl').folder('worksheets').file('sheet1.xml', xlsheet1);
+        zip.folder('xl').file('sharedStrings.xml', sharedStrings);
+        zip.folder('xl').file('styles.xml', xlstyle);
+        zip.folder('xl').file('workbook.xml', xlworkbook);
+        zip.file('[Content_Types].xml', content_type);
+
+        dwn.addEventListener('click', function () {
+            zip.generateAsync({
+                type: 'blob',
+                mimeType:
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            }).then((blob) => {
+                saveAs(blob, `tester.xlsx`);
+            });
+
+        });
+    </script>
+</body>
+
+</html>
